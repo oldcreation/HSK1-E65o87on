@@ -1,0 +1,782 @@
+<!DOCTYPE html>        
+<html>        
+<head>        
+<meta charset="UTF-8">        
+<title>Belajar HSK App</title>        
+      
+<style>
+body {
+    visibility: hidden;
+}
+
+body.ready {
+    visibility: visible;
+}
+body{      
+    margin:0;      
+    padding:0;      
+    font-family:Times New Roman;      
+    text-align:center;      
+    font-size:50px;      
+    color:#222;      
+    background:#F8F4E9;      
+    transition: background 0.5s, color 0.5s;      
+}      
+      
+body.dark-mode{      
+    background:#1e1e1e;      
+    color:#f2f2f2;      
+}      
+      
+h1{ margin-bottom:5px; }      
+      
+#subtitle{      
+    font-size:20px;      
+    color:gray;      
+    margin-top:-5px;      
+    margin-bottom:20px;      
+}      
+      
+#game{      
+    opacity:1;      
+    transition: opacity 0.5s ease;      
+}      
+      
+#progressContainer{      
+    width:90%;      
+    height:22px;      
+    background:#ddd;      
+    border-radius:999px;      
+    margin:20px auto;      
+    overflow:hidden;      
+}      
+      
+body.dark-mode #progressContainer{      
+    background:#333;      
+}      
+      
+#progressBar{      
+    height:100%;      
+    width:0%;      
+    background:#FFA500;      
+    border-radius:999px;      
+    transition: width 0.5s ease;      
+}      
+      
+button{      
+    font-family:Monospace;      
+    width:90%;      
+    padding:40px;      
+    margin:5px;      
+    font-size:40px;      
+    transition: background 0.3s ease;      
+}      
+      
+body.dark-mode button{      
+    background:#2b2b2b;      
+    color:#f2f2f2;      
+}      
+      
+#clock{      
+    font-size:18px;      
+    color:gray;      
+    margin-bottom:10px;      
+}      
+      
+h3{      
+    font-family: Times New Roman;      
+    font-size: 35px;      
+    color: gray;      
+}      
+      
+#result{      
+    transition: opacity 0.3s ease;      
+}      
+      
+.hanzi{      
+    font-family:Sans-Serif;      
+    font-size:200px;      
+}      
+      
+.pinyin{      
+    font-size:40px;      
+    color:gray;      
+}      
+      
+body.dark-mode .pinyin{      
+    color:#aaa;      
+}      
+      
+#bottomArea{      
+    position: fixed;      
+    bottom: 40px;      
+    left: 50%;      
+    transform: translateX(-50%);      
+}      
+      
+#modeToggle{      
+    width:100px;      
+    height:100px;      
+    border:none;      
+    background:transparent;      
+    cursor:pointer;      
+    color:#444;      
+      
+    display:flex;      
+    align-items:center;      
+    justify-content:center;      
+      
+    font-size:86px;      
+    line-height:1;      
+      
+    -webkit-tap-highlight-color: transparent;      
+    outline: none;      
+    user-select: none;      
+    transition: none;      
+}      
+      
+body.dark-mode #modeToggle{      
+    color:#ddd;      
+}      
+      
+#credit{      
+    position: fixed;      
+    bottom: 10px;      
+    left: 0;      
+    right: 0;      
+    display:flex;      
+    justify-content:center;      
+    font-size:14px;      
+    color:gray;      
+}      
+      
+body.dark-mode #credit{      
+    color:#aaa;      
+}      
+/*
+#partGrid{
+    width:95%;
+    margin:auto;
+
+    display:grid;
+    gap:10px;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(140px,1fr));
+}
+
+.partBtn{
+    width:100%;
+    margin:0;
+    padding:25px 10px;
+    font-size:30px;
+}
+*/
+#partList{
+    width:90%;
+    max-height:1150px;
+
+    margin:0 auto;
+
+    overflow-y:auto;
+
+    padding:10px;
+    box-sizing:border-box;
+
+    -webkit-mask-image:
+    linear-gradient(
+        to bottom,
+        transparent,
+        black 8%,
+        black 92%,
+        transparent
+    );
+
+    mask-image:
+    linear-gradient(
+        to bottom,
+        transparent,
+        black 8%,
+        black 92%,
+        transparent
+    );
+}
+.partBtn{
+    width:100%;
+    margin:5px 0;
+}
+
+#loginBox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: #F8F4E9;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 99999;
+}
+
+#loginBox input{  
+    width:620px;  
+    height: 80px;  
+    padding:12px;  
+    text-align: center;
+    font-size:52px;  
+    margin:2px 0;  
+    border-radius:8px;  
+    border:1px solid #ccc;  
+    outline:none;  
+}  
+  
+#loginBox button{  
+    width:320px;  
+    padding:12px;  
+    font-size:22px;  
+    margin-top:10px;  
+    border-radius:8px;  
+    cursor:pointer;  
+  
+    -webkit-tap-highlight-color: transparent;  
+    outline:none;  
+    box-shadow:none;  
+}  
+
+#loginResult{  
+    position:absolute;  
+    top: calc(14% - 120px);  
+    left:50%;  
+    transform:translateX(-50%);  
+      
+    opacity:0;  
+    transition: opacity 0.4s ease;  
+      
+    color:red;  
+    font-size:22px;  
+}  
+
+</style>      
+</head>      
+      
+<body>      
+<div id="loginBox" >  
+    <h2>Kamu Siapa?</h2>  <input id="username" placeholder=" Username">  
+<input id="password" type="text" placeholder=" Password" autocomplete="off"><br>
+<button onclick="login()" style="font-size:30px;padding:10px;margin-top:10px;">  
+    Masuk  
+</button>  
+
+<p id="loginResult"></p>
+
+</div>  
+      
+<h1>学习中文</h1>      
+<div id="subtitle"></div>      
+<div id="clock"></div>      
+      
+<div id="progressContainer">      
+    <div id="progressBar"></div>      
+</div>      
+      
+<div id="game">      
+<h2 id="question"></h2>      
+<div id="choices"></div>      
+<p id="result"></p>      
+</div>      
+      
+<div id="bottomArea">
+    <button id="modeToggle" onclick="toggleMode()">❂</button>
+</div>
+      
+<div id="credit">Credit: Rizqon Ganteng</div>      
+      
+<script>      
+      
+function getFileName(){
+     return
+/*
+    let path = "";      
+    try{ path = decodeURIComponent(window.location.pathname || ""); }catch(e){}      
+      
+    let fileName = path.split("/").pop() || "";      
+    fileName = fileName.replace(/%20/g, " ");      
+      
+    if(!fileName || fileName.trim()==="" || fileName==="index.html"){      
+        fileName = document.title;      
+    }      
+      
+    return fileName      
+        .replace(/\.(html|htm)$/i,"")      
+        .replace(/[-_]/g," ")      
+        .replace(/\s+/g," ")      
+        .trim();
+*/
+}      
+const JUDUL = "HSK 6"      
+document.getElementById("subtitle").textContent = "HSK 6";      
+      
+let questions = [];
+let originalQuestions = [];
+let allAnswers = [];
+      
+let wrongAnswered = [];
+      
+let wrongList = [];      
+      
+let current = 0;
+let gameStarted = false;
+let score = 0;
+let selectedName = "";
+let selectedPartName = "";
+      
+let startTime = new Date();      
+let endTime = null;      
+      
+function formatDateTime(d){      
+    let h = d.getHours().toString().padStart(2,"0");      
+    let m = d.getMinutes().toString().padStart(2,"0");      
+    let s = d.getSeconds().toString().padStart(2,"0");      
+      
+    let day = d.getDate().toString().padStart(2,"0");      
+    let month = (d.getMonth()+1).toString().padStart(2,"0");      
+    let year = d.getFullYear();      
+      
+    return `${day}/${month}/${year} ${h}:${m}:${s}`;      
+}      
+      
+function formatDuration(sec){      
+    let m = Math.floor(sec / 60);      
+    let s = sec % 60;      
+    return `${m} menit ${s} detik`;      
+}      
+      
+function shuffle(arr){      
+    for(let i=arr.length-1;i>0;i--){      
+        let j=Math.floor(Math.random()*(i+1));      
+        [arr[i],arr[j]]=[arr[j],arr[i]];      
+    }      
+}      
+      
+// PEMBAGIAN
+const totalParts = 1;
+
+function showNameSelection(){
+
+    document.getElementById("game").innerHTML = `
+        <h2>Siapa Kamu?</h2>
+
+        <button onclick="selectName('宋逸城')">宋逸城</button><br>
+        <button onclick="selectName('林婉玉')">林婉玉</button><br>
+        
+    `;
+}
+
+function selectName(name){
+    selectedName = name;
+    startPart(0);
+}
+
+function showPartSelection(){
+
+    const perPart = Math.ceil(originalQuestions.length / totalParts);
+
+    document.getElementById("game").innerHTML = `
+        <h2>Pilih Bagian</h2>
+
+        <div id="partList">
+        ${Array.from({length: totalParts}, (_,i)=>{
+
+            const start = (i * perPart) + 1;
+            const end = Math.min((i + 1) * perPart, originalQuestions.length);
+
+            if(start > originalQuestions.length) return "";
+
+          return `
+    <button
+        class="partBtn"
+        onclick="startPart(${i})">
+        LVL ${new Date().getDate()} (${start}-${end})
+    </button>
+`;
+        }).join("")}
+        </div>
+    `;
+}
+
+function startPart(){
+
+    const tanggal = new Date().getDate();
+
+    const totalHari = 24;
+    const totalSoal = originalQuestions.length;
+
+    const perHari = Math.ceil(totalSoal / totalHari);
+
+    const jumlahSoal = Math.min(
+        tanggal * perHari,
+        totalSoal
+    );
+
+    
+    gameStarted = true;
+
+    questions = originalQuestions.slice(0, jumlahSoal);
+
+    shuffle(questions);
+
+    wrongAnswered = Array(questions.length).fill(false);
+
+    current = 0;
+    score = 0;
+    wrongList = [];
+
+    startTime = new Date();
+
+    document.getElementById("game").innerHTML = `
+        <h2 id="question"></h2>
+        <div id="choices"></div>
+        <p id="result"></p>
+    `;
+
+    updateClock();
+updateProgressBar();
+loadQuestion();
+}
+      
+function updateProgressBar(){      
+    document.getElementById("progressBar").style.width =      
+        (current/questions.length)*100 + "%";      
+}      
+      
+function toggleMode(){
+    const dark = document.body.classList.toggle("dark-mode");
+
+    document.getElementById("modeToggle").textContent =
+        dark ? "☾" : "❂";
+}
+      
+function setFade(show){      
+    document.getElementById("game").style.opacity = show ? "1" : "0";      
+}      
+        
+function sendToGoogleForm(data){
+    fetch("https://docs.google.com/forms/d/e/1FAIpQLSd3Lfth_nzwMfgSULjhMjVUX4fm265Scg9-j9QEF8mOQUlk1Q/formResponse", {
+        method: "POST",
+        mode: "no-cors",
+        body: new URLSearchParams({
+            "entry.1211674030": data.judul,
+            "entry.1896488482": data.mulai,
+            "entry.643412851": currentUser,
+            "entry.1645384770": "88300493",
+            "entry.526927887": data.selesai,
+            "entry.877200631": data.durasi,
+            "entry.357571769": data.skor,
+            "entry.597288019": data.nilai,
+            "entry.876081317": data.evaluasi
+        })
+    });
+}
+      
+function updateClock(){      
+    const now = new Date();      
+      
+    let h = now.getHours().toString().padStart(2,"0");      
+    let m = now.getMinutes().toString().padStart(2,"0");      
+    let s = now.getSeconds().toString().padStart(2,"0");      
+      
+    let day = now.getDate().toString().padStart(2,"0");      
+    let month = (now.getMonth() + 1).toString().padStart(2,"0");      
+    let year = now.getFullYear();      
+      
+    let soalText = "";
+
+    if (gameStarted && questions.length > 0) {
+        soalText = ` | ${selectedPartName} | Soal ${current + 1}/${questions.length}`;
+    }
+
+    document.getElementById("clock").textContent =
+        `${day}/${month}/${year}  ${h}:${m}:${s}${soalText}`;
+}
+      
+setInterval(updateClock, 1000);      
+updateClock();      
+
+let currentUser = "";
+
+["username","password"].forEach(id=>{  
+    document.getElementById(id).addEventListener("keydown", e=>{  
+        if(e.key==="Enter"){  
+            login();  
+        }  
+    });  
+});  
+let realPassword = "";
+
+const pwInput = document.getElementById("password");
+
+pwInput.addEventListener("input", function(e){
+    const val = e.target.value;
+
+    // kalau user nambah karakter
+    if (val.length > realPassword.length) {
+        realPassword += val.slice(realPassword.length);
+    } 
+    // kalau user hapus
+    else {
+        realPassword = realPassword.slice(0, val.length);
+    }
+
+    // tampilkan sebagai x
+    pwInput.value = "●".repeat(realPassword.length);
+});
+
+function cekJamLogin(){
+    const now = new Date();
+    const jam = now.getHours() * 60 + now.getMinutes();
+
+    const mulai = 12 * 60 + 30; // 12:30
+    const selesai = 17 * 60;    // 17:00
+
+    return jam >= mulai && jam <= selesai;
+}
+
+function masukSoal(){
+    const tanggal = new Date().getDate();
+
+    selectedPartName = `LVL ${tanggal}`;
+
+    document.getElementById("loginBox").style.display = "none";
+
+    startPart();
+}
+
+function login(){
+
+    let user = document.getElementById("username").value;
+    let pass = realPassword;
+
+    fetch("https://raw.githubusercontent.com/bigmanors-art/LOGIN-AKUN-HSK/main/users.json")
+    .then(res => res.json())
+    .then(data => {
+
+        let found = data.find(u => u.user === user && u.pass === pass);
+
+        if(found){
+
+            currentUser = user;
+            masukSoal();
+
+        } else {
+
+            let el = document.getElementById("loginResult");
+            el.innerText = "Username / Password salah";
+            el.style.opacity = "1";
+
+            setTimeout(()=>{
+                el.style.opacity = "0";
+            }, 1500);
+
+        }
+    })
+    .catch(()=>{
+        document.getElementById("loginResult").innerText = "Gagal koneksi server";
+    });
+}
+      
+function loadQuestion(){      
+      
+    const qEl = document.getElementById("question");      
+    const result = document.getElementById("result");      
+      
+    result.innerText = "";      
+    setFade(false);      
+      
+    setTimeout(()=>{      
+      
+        if(current >= questions.length){      
+      
+            endTime = new Date();      
+            let duration = Math.floor((endTime - startTime)/1000);      
+      
+            let wrongHTML = wrongList.length===0 ? "<p>-</p>" : "";      
+            
+            let nilai = Math.round((score/questions.length)*100);      
+      
+            wrongList.forEach(q=>{      
+                wrongHTML += `      
+                <div style="margin:15px 0;font-size:50px;">      
+                    <b>${q.hanzi}</b> (${q.pinyin}) = ${q.answer}      
+                </div>`;      
+            
+            });      
+            
+            sendToGoogleForm({
+                judul:JUDUL+" "+selectedPartName,
+                mulai:formatDateTime(startTime),
+                selesai:formatDateTime(endTime),
+                durasi:formatDuration(duration),
+                skor:score,
+                nilai:nilai,
+                evaluasi:wrongList.map(q=>q.hanzi).join(", ")
+            });
+      
+            document.body.innerHTML = `
+    <h1>Hasil Akhir</h1>
+    <h3>${JUDUL}</h3>
+    <h3>${selectedPartName}</h3>
+
+    <h3>Mulai : ${formatDateTime(startTime)}</h3>
+    <h3>Selesai : ${formatDateTime(endTime)}</h3>
+    <h3>Durasi : ${formatDuration(duration)}</h3>
+
+    <h2>Skor : ${score} / ${questions.length}</h2>
+    <h2 style="color:orange">Nilai : ${Math.round((score/questions.length)*100)}</h2>
+
+    <h4>Evaluasi : ${wrongList.length}</h4>
+
+<div style="
+    width:90%;
+    max-height:800px;
+    margin:0 auto;
+    overflow-y:auto;
+    padding:10px;
+    box-sizing:border-box;
+
+    -webkit-mask-image:
+    linear-gradient(
+        to bottom,
+        transparent,
+        black 8%,
+        black 92%,
+        transparent
+    );
+
+    mask-image:
+    linear-gradient(
+        to bottom,
+        transparent,
+        black 8%,
+        black 92%,
+        transparent
+    );
+">
+        ${
+            wrongList.length===0
+            ? "<p>-</p>"
+            : wrongList.map(q=>`
+                <div style="margin:15px 0;font-size:50px;">
+                    <b>${q.hanzi}</b> (${q.pinyin}) = ${q.answer}
+                </div>
+            `).join("")
+        }
+    </div>
+
+    <div style="margin-top:30px;font-size:18px;color:gray;">
+        Credit: Rizqon Ganteng
+    </div>
+`;
+        }      
+      
+        updateProgressBar();      
+      
+        const q = questions[current];      
+      
+        qEl.innerHTML = `      
+            <div class="hanzi">${q.hanzi}</div>      
+            <div class="pinyin">${q.pinyin}</div>      
+        `;      
+      
+        let correct = q.answer;      
+        let wrongPool = allAnswers.filter(a=>a!==correct);      
+        shuffle(wrongPool);      
+      
+        let options = [correct, wrongPool[0], wrongPool[1], wrongPool[2]];      
+        shuffle(options);      
+      
+        document.getElementById("choices").innerHTML =      
+            options.map(opt =>      
+                `<button onclick="checkAnswer('${opt}', this)">${opt}</button>`      
+            ).join("<br>");      
+      
+        setFade(true);      
+      
+    }, 250);      
+}      
+      
+function checkAnswer(answer, btn){      
+      
+    const result = document.getElementById("result");      
+      
+    if(answer === questions[current].answer){      
+      
+        if(!wrongAnswered[current]) score++;      
+      
+        btn.style.backgroundColor = "#A8E6A1";      
+      
+        result.innerText = "✔";      
+        result.style.color = "green";      
+        result.style.opacity = "1";      
+      
+        setTimeout(()=> result.style.opacity = "0", 500);      
+      
+        current++;      
+        updateProgressBar();      
+      
+        setTimeout(loadQuestion, 500);      
+      
+    }else{      
+      
+        wrongAnswered[current] = true;      
+      
+        if(!wrongList.includes(questions[current])){      
+            wrongList.push(questions[current]);      
+        }      
+      
+        btn.style.backgroundColor = "#C97C7C";      
+      
+        result.innerText = "✘";      
+        result.style.color = "#C00000";      
+        result.style.opacity = "1";      
+      
+        btn.disabled = true;      
+      
+        setTimeout(()=> result.style.opacity = "0", 700);      
+    }      
+}      
+      
+fetch("https://raw.githubusercontent.com/bigmanors-art/LOGIN-AKUN-HSK/main/bank%20soal.json")
+.then(res => res.json())
+.then(data => {
+
+    questions = data.filter(q =>
+        q.hanzi && q.pinyin && q.answer
+    );
+
+    originalQuestions = [...questions];
+
+    allAnswers = [...new Set(questions.map(q => q.answer))];
+
+   if(cekJamLogin()){
+
+    document.getElementById("loginBox").style.display = "flex";
+
+}else{
+
+    currentUser = "Tanpa Login";
+    masukSoal();
+
+}
+
+document.body.classList.add("ready");
+})
+.catch(err => {
+    document.getElementById("game").innerHTML =
+        "<h3 style='color:red'>Gagal load soal</h3><p>" + err.message + "</p>";
+});
+      
+</script>      
+      
+</body>      
+</html>
